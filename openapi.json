@@ -1,0 +1,266 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bright Celestial Objects API",
+    "description": "API to get the brightest celestial objects at a specific location and time",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "Root endpoint with API information",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bright-objects": {
+      "get": {
+        "summary": "Get Bright Objects Endpoint",
+        "description": "Get the 20 brightest celestial objects above the horizon at a given location and time.\n\n- **latitude**: Latitude in decimal degrees (-90 to 90)\n- **longitude**: Longitude in decimal degrees (-180 to 180)\n- **time**: Optional time in ISO format. If not provided, uses current time at location.\n\nReturns a list of celestial objects with their properties.",
+        "operationId": "get_bright_objects_endpoint_api_bright_objects_get",
+        "parameters": [
+          {
+            "name": "latitude",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90.0,
+              "minimum": -90.0,
+              "description": "Latitude in decimal degrees",
+              "title": "Latitude"
+            },
+            "description": "Latitude in decimal degrees"
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180.0,
+              "minimum": -180.0,
+              "description": "Longitude in decimal degrees",
+              "title": "Longitude"
+            },
+            "description": "Longitude in decimal degrees"
+          },
+          {
+            "name": "time",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Time in ISO format (YYYY-MM-DDTHH:MM:SS)",
+              "title": "Time"
+            },
+            "description": "Time in ISO format (YYYY-MM-DDTHH:MM:SS)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Health check endpoint",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CelestialObject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "magnitude": {
+            "type": "number",
+            "title": "Magnitude"
+          },
+          "altitude": {
+            "type": "number",
+            "title": "Altitude"
+          },
+          "azimuth": {
+            "type": "number",
+            "title": "Azimuth"
+          },
+          "right_ascension": {
+            "type": "string",
+            "title": "Right Ascension"
+          },
+          "declination": {
+            "type": "string",
+            "title": "Declination"
+          },
+          "is_above_horizon": {
+            "type": "boolean",
+            "title": "Is Above Horizon"
+          },
+          "distance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "magnitude",
+          "altitude",
+          "azimuth",
+          "right_ascension",
+          "declination",
+          "is_above_horizon"
+        ],
+        "title": "CelestialObject",
+        "description": "Model for celestial object response"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ObservationResponse": {
+        "properties": {
+          "location": {
+            "type": "object",
+            "title": "Location"
+          },
+          "time_used": {
+            "type": "string",
+            "title": "Time Used"
+          },
+          "timezone_info": {
+            "type": "string",
+            "title": "Timezone Info"
+          },
+          "objects": {
+            "items": {
+              "$ref": "#/components/schemas/CelestialObject"
+            },
+            "type": "array",
+            "title": "Objects"
+          },
+          "total_objects_found": {
+            "type": "integer",
+            "title": "Total Objects Found"
+          }
+        },
+        "type": "object",
+        "required": [
+          "location",
+          "time_used",
+          "timezone_info",
+          "objects",
+          "total_objects_found"
+        ],
+        "title": "ObservationResponse",
+        "description": "Response model for the observation endpoint"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
