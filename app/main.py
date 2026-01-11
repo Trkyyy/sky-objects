@@ -1,0 +1,112 @@
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+import pytz
+from typing import Optional
+
+from .models import ObservationRequest, ObservationResponse, CelestialObject
+from .utils import create_observer, get_bright_objects, format_coordinates, get_timezone_from_coordinates
+
+app = FastAPI(
+    title="Bright Celestial Objects API",
+    description="API to get the brightest celestial objects at a specific location and time",
+    version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+async def root():
+    """Root endpoint with API information"""
+    return {
+        "message": "Bright Celestial Objects API",
+        "version": "1.0.0",
+        "endpoints": {
+            "GET /api/bright-objects": "Get brightest celestial objects at a location",
+            "GET /docs": "API documentation",
+            "GET /redoc": "Alternative documentation"
+        }
+    }
+
+
+@app.get("/api/bright-objects", response_model=ObservationResponse)
+async def get_bright_objects_endpoint(
+    latitude: float = Query(..., ge=-90, le=90, description="Latitude in decimal degrees"),
+    longitude: float = Query(..., ge=-180, le=180, description="Longitude in decimal degrees"),
+    time: Optional[str] = Query(None, description="Time in ISO format (YYYY-MM-DDTHH:MM:SS)")
+):
+    """
+    Get the 20 brightest celestial objects above the horizon at a given location and time.
+    
+    - **latitude**: Latitude in decimal degrees (-90 to 90)
+    - **longitude**: Longitude in decimal degrees (-180 to 180)
+    - **time**: Optional time in ISO format. If not provided, uses current time at location.
+    
+    Returns a list of celestial objects with their properties.
+    """
+    try:
+        # Create observer
+        observer = create_observer(latitude, longitude, time)
+        
+        # Get current time in location's timezone
+        timezone_str = get_timezone_from_coordinates(latitude, longitude)
+        try:
+            tz = pytz.timezone(timezone_str)
+            dt_utc = observer.date.datetime()
+            dt_local = dt_utc.astimezone(tz)
+            time_used = dt_local.isoformat()
+        except:
+            # Fallback to UTC
+            time_used = observer.date.datetime().isoformat()
+            timezone_str = "UTC"
+        
+        # Get bright objects
+        raw_objects = get_bright_objects(observer, max_objects=20)
+        
+        # Format coordinates and create response objects
+        formatted_objects = []
+        for obj in raw_objects:
+            formatted_objects.append(CelestialObject(
+                name=obj["name"],
+                type=obj["type"],
+                magnitude=round(obj["magnitude"], 2),
+                altitude=round(obj["altitude"], 2),
+                azimuth=round(obj["azimuth"], 2),
+                right_ascension=format_coordinates(obj["right_ascension"]),
+                declination=format_coordinates(obj["declination"]),
+                is_above_horizon=obj["is_above_horizon"],
+                distance=round(obj["distance"], 3) if obj["distance"] else None
+            ))
+        
+        response = ObservationResponse(
+            location={
+                "latitude": latitude,
+                "longitude": longitude,
+                "coordinates": f"{latitude:.6f}, {longitude:.6f}"
+            },
+            time_used=time_used,
+            timezone_info=timezone_str,
+            objects=formatted_objects,
+            total_objects_found=len(formatted_objects)
+        )
+        
+        return response
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
