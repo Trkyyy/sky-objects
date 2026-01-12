@@ -205,6 +205,37 @@ input:focus {
   color: var(--muted);
 }
 
+.sky-view {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.sky-view-header h2 {
+  margin: 0;
+}
+
+.sky-view-header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.sky-canvas-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+#sky-map {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #0d1124;
+  max-width: 100%;
+  height: auto;
+}
+
 .results {
   background: var(--panel);
   border: 1px solid var(--border);

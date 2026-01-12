@@ -11,7 +11,8 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
-  <link rel="icon" href="../assets/sky-objects.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png" />
 </head>
 <body>
   <header class="topbar">
@@ -69,6 +70,16 @@
           <button id="fetch" class="primary">Find bright objects</button>
           <div class="status" id="status"></div>
         </div>
+      </div>
+    </section>
+
+    <section class="sky-view">
+      <div class="sky-view-header">
+        <h2>Sky Map</h2>
+        <p>View of the sky looking up from your location · North at top · Horizon at edge · Zenith at center</p>
+      </div>
+      <div class="sky-canvas-wrap">
+        <canvas id="sky-map" width="600" height="600"></canvas>
       </div>
     </section>
 
