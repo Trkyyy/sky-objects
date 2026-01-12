@@ -18,6 +18,7 @@ let skyIsDragging = false;
 let skyDragStartX = 0;
 let skyDragStartY = 0;
 let currentSkyObjects = [];
+let hoveredObject = null;
 
 const latInput = document.getElementById("lat");
 const lonInput = document.getElementById("lon");
@@ -31,6 +32,7 @@ const summaryEl = document.getElementById("summary");
 const tzPill = document.getElementById("timezone-pill");
 const skyCanvas = document.getElementById("sky-map");
 const skyCtx = skyCanvas.getContext("2d");
+const skyTooltip = document.getElementById("sky-tooltip");
 
 function initMap() {
   const start = quickCities[0];
@@ -352,6 +354,115 @@ function setStatus(msg, isError) {
   statusEl.style.color = isError ? "var(--error)" : "var(--muted)";
 }
 
+function getObjectAtPosition(mouseX, mouseY) {
+  const width = skyCanvas.width;
+  const height = skyCanvas.height;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const maxRadius = (Math.min(centerX, centerY) - 40) * skyZoom;
+  
+  // Account for pan offset
+  const adjustedX = mouseX - skyPanX;
+  const adjustedY = mouseY - skyPanY;
+  
+  for (const obj of currentSkyObjects) {
+    const pos = altAzToXY(obj.altitude, obj.azimuth, centerX, centerY, maxRadius);
+    const radius = getObjectRadius(obj.magnitude);
+    const distance = Math.sqrt(Math.pow(adjustedX - pos.x, 2) + Math.pow(adjustedY - pos.y, 2));
+    
+    // Add some padding for easier hovering (hitbox 3x the visual radius)
+    if (distance <= radius * 3) {
+      return obj;
+    }
+  }
+  return null;
+}
+
+let skyTooltipPopper = null;
+
+function showTooltip(obj, canvasX, canvasY) {
+  if (!obj) {
+    // Hide immediately without repositioning
+    skyTooltip.classList.remove("visible");
+    // Defer cleanup to avoid flash
+    setTimeout(() => {
+      if (skyTooltipPopper && !hoveredObject) {
+        skyTooltipPopper.destroy();
+        skyTooltipPopper = null;
+      }
+    }, 100);
+    return;
+  }
+  
+  const dist = obj.distance !== null && obj.distance !== undefined ? `${obj.distance.toFixed(3)} AU` : "N/A";
+  
+  skyTooltip.innerHTML = `
+    <div class="tooltip-title">${obj.name}</div>
+    <div class="tooltip-row">Type: <span>${obj.type}</span></div>
+    <div class="tooltip-row">Magnitude: <span>${obj.magnitude.toFixed(2)}</span></div>
+    <div class="tooltip-row">Altitude: <span>${obj.altitude.toFixed(2)}°</span></div>
+    <div class="tooltip-row">Azimuth: <span>${obj.azimuth.toFixed(2)}°</span></div>
+    <div class="tooltip-row">RA: <span>${obj.right_ascension}</span></div>
+    <div class="tooltip-row">Dec: <span>${obj.declination}</span></div>
+    <div class="tooltip-row">Distance: <span>${dist}</span></div>
+  `;
+  
+  skyTooltip.classList.add("visible");
+  
+  // Create a virtual element at the mouse position
+  const virtualElement = {
+    getBoundingClientRect: () => {
+      const rect = skyCanvas.getBoundingClientRect();
+      const scaleX = rect.width / skyCanvas.width;
+      const scaleY = rect.height / skyCanvas.height;
+      
+      const x = rect.left + canvasX * scaleX;
+      const y = rect.top + canvasY * scaleY;
+      
+      // Return a small rectangle at the cursor position
+      return {
+        width: 0,
+        height: 0,
+        top: y,
+        right: x,
+        bottom: y,
+        left: x
+      };
+    }
+  };
+  
+  // If we already have a popper instance, destroy it
+  if (skyTooltipPopper) {
+    skyTooltipPopper.destroy();
+  }
+  
+  // Create new popper instance
+  skyTooltipPopper = Popper.createPopper(virtualElement, skyTooltip, {
+    placement: 'right-start', // Try right side first
+    modifiers: [
+      {
+        name: 'preventOverflow',
+        options: {
+          boundary: 'viewport',
+          padding: 8
+        }
+      },
+      {
+        name: 'flip',
+        options: {
+          fallbackPlacements: ['left-start', 'right-end', 'left-end', 'top-start', 'top-end', 'bottom-start', 'bottom-end']
+        }
+      },
+      {
+        name: 'offset',
+        options: {
+          offset: [0, 8] // 8px offset from cursor
+        }
+      }
+    ]
+  });
+}
+
 function wireEvents() {
   fetchBtn.addEventListener("click", fetchObjects);
   
@@ -398,6 +509,13 @@ function wireEvents() {
       if (currentSkyObjects.length > 0) {
         renderSkyMap();
       }
+    } else {
+      // Check for hover when not dragging
+      const obj = getObjectAtPosition(e.offsetX, e.offsetY);
+      if (obj !== hoveredObject) {
+        hoveredObject = obj;
+        showTooltip(obj, e.offsetX, e.offsetY);
+      }
     }
   });
   
@@ -409,6 +527,8 @@ function wireEvents() {
   skyCanvas.addEventListener("mouseleave", () => {
     skyIsDragging = false;
     skyCanvas.style.cursor = "grab";
+    hoveredObject = null;
+    showTooltip(null);
   });
   
   // Reset zoom/pan on double-click

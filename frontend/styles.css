@@ -226,6 +226,7 @@ input:focus {
   display: flex;
   justify-content: center;
   margin-top: 14px;
+  position: relative;
 }
 
 #sky-map {
@@ -234,6 +235,41 @@ input:focus {
   background: #0d1124;
   max-width: 100%;
   height: auto;
+}
+
+.sky-tooltip {
+  position: absolute;
+  background: rgba(22, 29, 58, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  min-width: 180px;
+}
+
+.sky-tooltip.visible {
+  opacity: 1;
+}
+
+.sky-tooltip .tooltip-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.sky-tooltip .tooltip-row {
+  margin: 3px 0;
+  color: var(--muted);
+}
+
+.sky-tooltip .tooltip-row span {
+  color: var(--text);
 }
 
 .results {
