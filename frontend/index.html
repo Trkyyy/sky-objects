@@ -73,6 +73,8 @@
       </div>
     </section>
 
+    
+
     <section class="sky-view">
       <div class="sky-view-header">
         <h2>Sky Map</h2>
@@ -93,8 +95,40 @@
         <div class="pill" id="timezone-pill">Timezone: --</div>
       </div>
       <div id="objects" class="object-list"></div>
+      
+    </section>
+
+    <!-- Learn More Panel (moved to bottom) -->
+    <section class="learn-more-panel">
+      <div class="learn-more-toggle" id="learn-more-toggle">
+        <span class="toggle-text">Learn more about the science</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="learn-more-content" id="learn-more-content">
+        <div class="learn-section" id="magnitude-section">
+          <h3>Magnitude</h3>
+          <div class="learn-text"></div>
+        </div>
+        <div class="learn-section" id="ra-section">
+          <div class="learn-text"></div>
+        </div>
+        <div class="learn-section" id="declination-section">
+          <div class="learn-text"></div>
+        </div>
+      </div>
     </section>
   </main>
+
+  <!-- Modal for object details -->
+  <div id="details-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Object Details</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
