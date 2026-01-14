@@ -1,0 +1,10 @@
+{
+  "name": "sky-objects-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Sky Objects application",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "python -m http.server 8008"
+  },
+  "devDependencies": {}
+}

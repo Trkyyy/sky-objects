@@ -1,0 +1,8 @@
+.github
+.venv
+*/__pycache__
+
+# Build output
+frontend/env-config.js
+node_modules/
+NETLIFY_DEPLOYMENT.md

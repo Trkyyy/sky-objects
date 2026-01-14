@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bright Sky Objects</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span class="title">Bright Sky Objects</span>
+    </div>
+    <div class="api-info">
+      <span>Backend: FastAPI @ /api/bright-objects</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <div class="panel-header">
+        <h1>Pick a spot and time</h1>
+        <p>Select a location on the map or use a quick city, choose date/time, then fetch the brightest objects above the horizon.</p>
+      </div>
+
+      <div class="controls">
+        <div class="map-wrap">
+          <div id="map"></div>
+          <div class="hint">Click anywhere to set location • Scroll to zoom • Drag to pan</div>
+        </div>
+
+        <div class="inputs">
+          <label class="field">
+            <span>Quick cities</span>
+            <div class="chips" id="quick-cities"></div>
+          </label>
+
+          <label class="field">
+            <span>Latitude (-90 to 90)</span>
+            <input type="number" step="0.0001" id="lat" placeholder="40.7128" />
+          </label>
+          <label class="field">
+            <span>Longitude (-180 to 180)</span>
+            <input type="number" step="0.0001" id="lon" placeholder="-74.0060" />
+          </label>
+
+          <label class="field">
+            <span>Date</span>
+            <input type="date" id="date" />
+          </label>
+          <label class="field">
+            <span>Time</span>
+            <input type="time" id="time" step="1" />
+          </label>
+
+          <button id="fetch" class="primary">Find bright objects</button>
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+    </section>
+
+    
+
+    <section class="sky-view">
+      <div class="sky-view-header">
+        <h2>Sky Map</h2>
+        <p>View of the sky looking up from your location · North at top · Horizon at edge · Zenith at center</p>
+      </div>
+      <div class="sky-canvas-wrap">
+        <canvas id="sky-map" width="600" height="600"></canvas>
+        <div id="sky-tooltip" class="sky-tooltip"></div>
+      </div>
+    </section>
+
+    <section class="results">
+      <div class="results-header">
+        <div>
+          <h2>Results</h2>
+          <p id="summary">No query yet. Set a location and time to begin.</p>
+        </div>
+        <div class="pill" id="timezone-pill">Timezone: --</div>
+      </div>
+      <div id="objects" class="object-list"></div>
+      
+    </section>
+
+    <!-- Learn More Panel (moved to bottom) -->
+    <section class="learn-more-panel">
+      <div class="learn-more-toggle" id="learn-more-toggle">
+        <span class="toggle-text">Learn more about the science</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="learn-more-content" id="learn-more-content">
+        <div class="learn-section" id="magnitude-section">
+          <h3>Magnitude</h3>
+          <div class="learn-text"></div>
+        </div>
+        <div class="learn-section" id="ra-section">
+          <div class="learn-text"></div>
+        </div>
+        <div class="learn-section" id="declination-section">
+          <div class="learn-text"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for object details -->
+  <div id="details-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Object Details</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="env-config.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -142,8 +142,8 @@ def get_bright_objects(observer: ephem.Observer, max_objects: int = 20) -> List[
                 "magnitude": mag,
                 "altitude": alt,
                 "azimuth": math.degrees(obj.az),
-                "right_ascension": str(obj.ra),
-                "declination": str(obj.dec),
+                "right_ascension": format_coordinates(str(obj.ra)),
+                "declination": format_declination(str(obj.dec)),
                 "is_above_horizon": alt > 0,
                 "distance": distance
             })
@@ -165,8 +165,8 @@ def get_bright_objects(observer: ephem.Observer, max_objects: int = 20) -> List[
                 "magnitude": mag,
                 "altitude": alt,
                 "azimuth": math.degrees(moon.az),
-                "right_ascension": str(moon.ra),
-                "declination": str(moon.dec),
+                "right_ascension": format_coordinates(str(moon.ra)),
+                "declination": format_declination(str(moon.dec)),
                 "is_above_horizon": alt > 0,
                 "distance": None
             })
@@ -194,8 +194,8 @@ def get_bright_objects(observer: ephem.Observer, max_objects: int = 20) -> List[
                 "magnitude": mag,
                 "altitude": alt,
                 "azimuth": math.degrees(star.az),
-                "right_ascension": str(star.ra),
-                "declination": str(star.dec),
+                "right_ascension": format_coordinates(str(star.ra)),
+                "declination": format_declination(str(star.dec)),
                 "is_above_horizon": alt > 0,
                 "distance": None
             })
@@ -210,5 +210,23 @@ def get_bright_objects(observer: ephem.Observer, max_objects: int = 20) -> List[
 
 
 def format_coordinates(coord: str) -> str:
-    """Format RA/Dec coordinates for display"""
-    return coord.replace(":", "h ", 1).replace(":", "m ", 1) + "s"
+    """Format RA coordinates for display (hours:minutes:seconds -> h m s)"""
+    # Replace colons with unit symbols
+    parts = coord.split(":")
+    if len(parts) >= 3:
+        return f"{parts[0]}h {parts[1]}m {parts[2]}s"
+    return coord
+
+
+def format_declination(dec: str) -> str:
+    """Format Dec coordinates for display (degrees:arcminutes:arcseconds -> ° ′ ″)"""
+    # Handle the sign
+    is_negative = dec.startswith("-")
+    dec_clean = dec.lstrip("+-")
+    
+    # Split by colons and format
+    parts = dec_clean.split(":")
+    if len(parts) >= 3:
+        sign = "-" if is_negative else "+"
+        return f"{sign}{parts[0]}° {parts[1]}′ {parts[2]}″"
+    return dec
