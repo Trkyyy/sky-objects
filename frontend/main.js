@@ -22,19 +22,8 @@ let currentSkyObjects = [];
 let hoveredObject = null;
 let celestialObjectsData = []; // Store objects globally for modal access
 
-const latInput = document.getElementById("lat");
-const lonInput = document.getElementById("lon");
-const dateInput = document.getElementById("date");
-const timeInput = document.getElementById("time");
-const apiBaseInput = document.getElementById("api-base");
-const fetchBtn = document.getElementById("fetch");
-const statusEl = document.getElementById("status");
-const objectsEl = document.getElementById("objects");
-const summaryEl = document.getElementById("summary");
-const tzPill = document.getElementById("timezone-pill");
-const skyCanvas = document.getElementById("sky-map");
-const skyCtx = skyCanvas.getContext("2d");
-const skyTooltip = document.getElementById("sky-tooltip");
+// DOM elements - will be assigned in main()
+let latInput, lonInput, dateInput, timeInput, fetchBtn, statusEl, objectsEl, summaryEl, tzPill, skyCanvas, skyCtx, skyTooltip;
 
 function initMap() {
   const start = quickCities[0];
@@ -51,6 +40,10 @@ function initMap() {
 }
 
 function setLocation(lat, lon) {
+  if (!latInput || !lonInput) {
+    console.error('DOM elements not initialized: latInput=' + latInput + ', lonInput=' + lonInput);
+    return;
+  }
   latInput.value = lat.toFixed(4);
   lonInput.value = lon.toFixed(4);
   marker.setLatLng([lat, lon]);
@@ -80,6 +73,10 @@ function setActiveChip(btn) {
 }
 
 function setDefaults() {
+  if (!dateInput || !timeInput) {
+    console.error('DOM elements not initialized: dateInput=' + dateInput + ', timeInput=' + timeInput);
+    return;
+  }
   const now = new Date();
   const isoDate = now.toISOString().slice(0, 10);
   const isoTime = now.toISOString().slice(11, 19);
@@ -96,12 +93,24 @@ function isoForApi(dateStr, timeStr) {
   // Send as UTC with Z to match backend parsing
   return local.toISOString().slice(0, 19) + "Z";
 }
+//asdawdasd
+
 
 async function fetchObjects() {
+  if (!latInput || !lonInput || !dateInput || !timeInput) {
+    console.error('DOM elements not initialized when fetchObjects called');
+    console.error('latInput:', latInput);
+    console.error('lonInput:', lonInput);
+    console.error('dateInput:', dateInput);
+    console.error('timeInput:', timeInput);
+    return;
+  }
+  
   const lat = parseFloat(latInput.value);
   const lon = parseFloat(lonInput.value);
   const time = isoForApi(dateInput.value, timeInput.value);
-  const apiBase = apiBaseInput.value.trim().replace(/\/$/, "");
+  // Use environment variable API_BASE_URL if available, otherwise fall back to localhost
+  const apiBase = window.ENV?.API_BASE_URL || "http://localhost:8000";
 
   if (Number.isNaN(lat) || lat < -90 || lat > 90) {
     setStatus("Latitude must be between -90 and 90", true);
@@ -842,6 +851,37 @@ function wireEvents() {
 }
 
 function main() {
+  // Initialize DOM element references
+  latInput = document.getElementById("lat");
+  lonInput = document.getElementById("lon");
+  dateInput = document.getElementById("date");
+  timeInput = document.getElementById("time");
+  fetchBtn = document.getElementById("fetch");
+  statusEl = document.getElementById("status");
+  objectsEl = document.getElementById("objects");
+  summaryEl = document.getElementById("summary");
+  tzPill = document.getElementById("timezone-pill");
+  skyCanvas = document.getElementById("sky-map");
+  skyTooltip = document.getElementById("sky-tooltip");
+  
+  // Check if critical elements were found
+  if (!skyCanvas) {
+    console.error("Could not find sky-map canvas element");
+    return;
+  }
+  
+  skyCtx = skyCanvas.getContext("2d");
+  
+  // Verify all critical DOM elements are found
+  console.log("DOM elements initialized:", {
+    latInput: !!latInput,
+    lonInput: !!lonInput,
+    dateInput: !!dateInput,
+    timeInput: !!timeInput,
+    fetchBtn: !!fetchBtn,
+    skyCanvas: !!skyCanvas
+  });
+
   buildQuickCities();
   initMap();
   setDefaults();
@@ -857,4 +897,6 @@ function main() {
   fetchObjects();
 }
 
-main();
+document.addEventListener('DOMContentLoaded', () => {
+  main();
+});
