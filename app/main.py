@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import pytz
+import os
 from typing import Optional
 
 from .models import ObservationRequest, ObservationResponse, CelestialObject
@@ -13,12 +14,26 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware
+# Production-ready CORS settings
+allowed_origins = [
+    "http://localhost:8008",  # Local development
+    "http://127.0.0.1:8008",
+]
+
+# Add production origins from environment variable
+production_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+if production_origins and production_origins[0]:  # Check if not empty
+    allowed_origins.extend([origin.strip() for origin in production_origins])
+
+# For development, allow all origins (set ENVIRONMENT=development)
+if os.getenv("ENVIRONMENT") == "development":
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
