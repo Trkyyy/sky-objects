@@ -57,6 +57,12 @@ async def root():
     }
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Railway"""
+    return {"status": "healthy", "service": "sky-objects-api"}
+
+
 @app.get("/api/bright-objects", response_model=ObservationResponse)
 async def get_bright_objects_endpoint(
     latitude: float = Query(..., ge=-90, le=90, description="Latitude in decimal degrees"),
