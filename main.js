@@ -110,7 +110,7 @@ async function fetchObjects() {
   const lon = parseFloat(lonInput.value);
   const time = isoForApi(dateInput.value, timeInput.value);
   // Use environment variable API_BASE_URL if available, otherwise fall back to localhost
-  const apiBase = window.ENV?.API_BASE_URL || "http://localhost:8000";
+  const apiBase = window.ENV?.API_BASE_URL || "https://sky-objects-production.up.railway.app";
 
   if (Number.isNaN(lat) || lat < -90 || lat > 90) {
     setStatus("Latitude must be between -90 and 90", true);
