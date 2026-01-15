@@ -5,8 +5,13 @@ import pytz
 import os
 from typing import Optional
 
-from .models import ObservationRequest, ObservationResponse, CelestialObject
-from .utils import create_observer, get_bright_objects, format_coordinates, get_timezone_from_coordinates
+# Handle both relative imports (when run as package) and absolute imports (when run directly)
+try:
+    from .models import ObservationRequest, ObservationResponse, CelestialObject
+    from .utils import create_observer, get_bright_objects, format_coordinates, get_timezone_from_coordinates
+except ImportError:
+    from models import ObservationRequest, ObservationResponse, CelestialObject
+    from utils import create_observer, get_bright_objects, format_coordinates, get_timezone_from_coordinates
 
 app = FastAPI(
     title="Bright Celestial Objects API",
