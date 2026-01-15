@@ -23,6 +23,7 @@ app = FastAPI(
 allowed_origins = [
     "http://localhost:8008",  # Local development
     "http://127.0.0.1:8008",
+    "https://trkyyy.github.io",  # GitHub Pages
 ]
 
 # Add production origins from environment variable
