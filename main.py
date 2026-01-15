@@ -1,4 +1,4 @@
-# Railway deployment entry point
+# Railway deployment entry point for the backend
 # This file ensures Railway finds the correct main module
 import sys
 import os
@@ -22,7 +22,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     print(f"Starting uvicorn on host 0.0.0.0 port {port}")
     
-    # Add access logging to see if requests are reaching the app
     uvicorn.run(
         app, 
         host="0.0.0.0", 

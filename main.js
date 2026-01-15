@@ -93,7 +93,6 @@ function isoForApi(dateStr, timeStr) {
   // Send as UTC with Z to match backend parsing
   return local.toISOString().slice(0, 19) + "Z";
 }
-//asdawdasd
 
 
 async function fetchObjects() {
@@ -211,8 +210,7 @@ function showObjectDetails(objIndex) {
     magnitude: "Apparent brightness on a scale where lower numbers are brighter. The brightest objects have negative magnitudes. Learn more below ↓",
     altitude: "Height above the horizon in degrees. 0° is at the horizon, 90° is directly overhead (zenith)",
     azimuth: "Direction from north, measured clockwise. 0° is north, 90° is east, 180° is south, 270° is west",
-    ra: "Right Ascension (RA) - celestial longitude coordinate, measured in hours (h), minutes (m), and seconds (s). Learn more below ↓",
-    dec: "Declination (Dec) - celestial latitude coordinate, measured in degrees (°), arcminutes (′), and arcseconds (″). Positive (+) is north of the celestial equator, negative (-) is south. Learn more below ↓",
+    ra: "Right Ascension (RA) - celestial longitude coordinate, measured in hours (h), minutes (m), and seconds (s).",
     distance: "Distance from Earth in Astronomical Units (AU). 1 AU = Earth's distance from the Sun (~150 million km)"
   };
   
@@ -253,13 +251,7 @@ function showObjectDetails(objIndex) {
       </div>
       <span class="value">${obj.right_ascension}</span>
     </div>
-    <div class="modal-detail-row">
-      <div class="label-with-tooltip">
-        <span class="label">Declination</span>
-        <span class="tooltip-icon" data-tooltip="${tooltips.dec}">ℹ</span>
-      </div>
-      <span class="value">${obj.declination}</span>
-    </div>
+    
     ${isStar ? "" : `<div class="modal-detail-row">
       <div class="label-with-tooltip">
         <span class="label">Distance</span>
@@ -376,17 +368,8 @@ const educationalContent = {
         <small>Animation by <a href="https://commons.wikimedia.org/wiki/User:Tfr000" target="_blank" rel="noopener">Tfr000</a> - Own work, <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank" rel="noopener">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=19127102" target="_blank" rel="noopener">Wikimedia Commons</a></small>
       </div>
     </div>
-    
-    <h5 style="color: var(--accent); margin: 20px 0 12px 0; font-size: 14px;">Right Ascension (RA)</h5>
-    <p><strong>What is Right Ascension?</strong> Right Ascension is like longitude on Earth, but projected onto the celestial sphere. It measures how far east a star is from a standard starting point.</p>
-    <p><strong>Like a clock:</strong> Right Ascension works like hours on a clock face. As Earth spins, stars appear to move around the sky in a 24-hour cycle.</p>
   `,
-  declination: `
-    <h5 style="color: var(--accent); margin: 20px 0 12px 0; font-size: 14px;">Declination (Dec)</h5>
-    <p><strong>What is Declination?</strong> Declination is like latitude on Earth, but projected onto the celestial sphere. It measures how far north (+) or south (-) a star is from the celestial equator.</p>
-    <p><strong>Key insight:</strong> Stars with positive declination are north of the celestial equator, while stars with negative declination are south of it.</p>
-    <p><strong>Why Polaris matters:</strong> The North Star (Polaris) is at +89°, almost at the north pole of the sky, which is why it stays in one spot while other stars circle around it.</p>
-  `
+  
 };
 
 // Initialize the Learn More panel
@@ -398,7 +381,6 @@ function initLearnMorePanel() {
   // Populate educational content
   document.querySelector('#magnitude-section .learn-text').innerHTML = educationalContent.magnitude;
   document.querySelector('#ra-section .learn-text').innerHTML = educationalContent.ra;
-  document.querySelector('#declination-section .learn-text').innerHTML = educationalContent.declination;
   
   // Add interactive diagram functionality
   setupDiagramInteractions();
@@ -427,8 +409,6 @@ function initLearnMorePanel() {
         targetSection = document.getElementById('magnitude-section');
       } else if (tooltipText.includes('Right Ascension') || tooltipText.includes('RA')) {
         targetSection = document.getElementById('ra-section');
-      } else if (tooltipText.includes('Declination') || tooltipText.includes('Dec')) {
-        targetSection = document.getElementById('declination-section');
       }
       
       if (targetSection) {
@@ -696,7 +676,6 @@ function showTooltip(obj, canvasX, canvasY) {
     <div class="tooltip-row">Altitude: <span>${obj.altitude.toFixed(2)}°</span></div>
     <div class="tooltip-row">Azimuth: <span>${obj.azimuth.toFixed(2)}°</span></div>
     <div class="tooltip-row">RA: <span>${obj.right_ascension}</span></div>
-    <div class="tooltip-row">Dec: <span>${obj.declination}</span></div>
     ${isStar ? "" : `<div class="tooltip-row">Distance: <span>${dist}</span></div>`}
   `;
   
