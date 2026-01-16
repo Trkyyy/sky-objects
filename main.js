@@ -72,6 +72,23 @@ function setActiveChip(btn) {
   if (btn) btn.classList.add('active');
 }
 
+// Find a chip by its display name and activate it (or clear all if name not found/null)
+function setActiveChipByName(name) {
+  const chips = Array.from(document.querySelectorAll('.chip'));
+  if (!name) {
+    // Clear all
+    chips.forEach(c => c.classList.remove('active'));
+    return;
+  }
+  const match = chips.find(c => c.textContent && c.textContent.trim() === name);
+  if (match) {
+    setActiveChip(match);
+  } else {
+    // If not found, clear all
+    chips.forEach(c => c.classList.remove('active'));
+  }
+}
+
 function setDefaults() {
   if (!dateInput || !timeInput) {
     console.error('DOM elements not initialized: dateInput=' + dateInput + ', timeInput=' + timeInput);
@@ -82,7 +99,49 @@ function setDefaults() {
   const isoTime = now.toISOString().slice(11, 19);
   dateInput.value = isoDate;
   timeInput.value = isoTime;
-  setLocation(quickCities[0].lat, quickCities[0].lon);
+}
+
+// Try to obtain user's browser geolocation and fall back to Belfast if denied/unavailable
+function requestGeolocationWithFallback() {
+  const fallback = quickCities[0]; // Belfast
+
+  // If geolocation API not available, use fallback
+  if (!('geolocation' in navigator)) {
+    setStatus('Geolocation not supported — using Belfast', true);
+    setLocation(fallback.lat, fallback.lon);
+    map.setView([fallback.lat, fallback.lon], 5);
+    // Ensure the Belfast quick city is highlighted (fallback)
+    try { setActiveChipByName(fallback.name); } catch (e) {}
+    // Fetch now that we have a usable location
+    try { fetchObjects(); } catch (e) {}
+    return;
+  }
+
+  setStatus('Requesting browser location — please allow if prompted', false);
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      setLocation(lat, lon);
+      try { map.setView([lat, lon], 8); } catch (e) {}
+      setStatus('Using browser location', false);
+      // Clear any quick-city highlight (we're using the browser location)
+      try { setActiveChipByName(null); } catch (e) {}
+      try { fetchObjects(); } catch (e) {}
+    },
+    (err) => {
+      // On any error (including permission denied), fall back to Belfast
+      console.warn('Geolocation error, falling back to Belfast:', err);
+      setStatus('Location unavailable or denied — using Belfast', true);
+      setLocation(fallback.lat, fallback.lon);
+      try { map.setView([fallback.lat, fallback.lon], 5); } catch (e) {}
+      // Make sure Belfast chip is active when using the fallback
+      try { setActiveChipByName(fallback.name); } catch (e) {}
+      try { fetchObjects(); } catch (e) {}
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60 * 1000 }
+  );
 }
 
 function isoForApi(dateStr, timeStr) {
@@ -864,6 +923,7 @@ function main() {
   buildQuickCities();
   initMap();
   setDefaults();
+  requestGeolocationWithFallback();
   wireEvents();
   initLearnMorePanel();
   clearSkyMap(); // Initialize empty sky map
@@ -871,9 +931,7 @@ function main() {
   // Mark the first quick city as active (default) and fetch results immediately
   const firstChip = document.querySelector('#quick-cities .chip');
   if (firstChip) setActiveChip(firstChip);
-
-  // Trigger initial fetch using the defaults set above
-  fetchObjects();
+  // Initial fetch will be triggered after geolocation is resolved (or fallback)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
